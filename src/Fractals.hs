@@ -2,6 +2,7 @@ module Fractals
     ( order
     , mandelbrot
     , bmp
+    , toGrayscale
     ) where
 
 import Data.Complex (Complex(..), magnitude)
@@ -31,7 +32,7 @@ bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA
 
 bmpValues :: Int -> Int -> Float -> Float -> Float -> [Word8]
-bmpValues w h xc yc picScale = [ fromIntegral $ order (mandelbrot z0) 2.0 255 (0.0 :+ 0.0) |
+bmpValues w h xc yc picScale = [ fromIntegral $ order (mandelbrot z0) 2.0 255 z0 |
     j <- [0..h-1], i <- [0..w-1],
     let x0 = xc - 0.5*wf + (fromIntegral i)*wf/(fromIntegral (w-1)),
     let y0 = yc - 0.5*hf + (fromIntegral j)*hf/(fromIntegral (h-1)),
