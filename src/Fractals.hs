@@ -3,9 +3,11 @@ module Fractals
     , mandelbrot
     , bmp
     , toGrayscale
+    , tangentPoint
+    , mandelbrotCardioid
     ) where
 
-import Data.Complex (Complex(..), magnitude)
+import Data.Complex (Complex(..), magnitude, mkPolar)
 import Graphics.Gloss
 import qualified Data.ByteString as B
 import Data.Word
@@ -27,6 +29,13 @@ mandelbrot :: RealFloat a
            -> Complex a -- ^ the z variable
            -> Complex a -- ^ the resulting value
 mandelbrot c z = z**2 + c
+
+tangentPoint :: RealFloat a => Rational -> Complex a
+tangentPoint r = mandelbrotCardioid mu
+    where mu = mkPolar 1.0 (2.0 * pi * fromRational r)
+
+mandelbrotCardioid :: RealFloat a => Complex a -> Complex a
+mandelbrotCardioid mu = 0.5 * mu * (1.0 - 0.5 * mu)
 
 bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA

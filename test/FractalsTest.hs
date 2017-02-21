@@ -26,7 +26,7 @@ prop_orderMandelbrotCardioid :: Positive Int    -- ^ the max number of iteration
                              -> Property
 prop_orderMandelbrotCardioid (Positive nMax) w z =
     (magZ>0.0 || magW>0.0) ==> inMandelbrotSet nMax z0
-    where z0 = 0.5 * mu * (1.0 - 0.5 * mu)
+    where z0 = mandelbrotCardioid mu
           magW = magnitude w
           magZ = magnitude z
           mu = if magW < magZ then fmap (/magZ) w else fmap (/magW) z
