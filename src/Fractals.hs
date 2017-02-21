@@ -13,6 +13,7 @@ import Data.Complex (Complex(..), mkPolar)
 import Graphics.Gloss
 import qualified Data.ByteString as B
 import Data.Word
+import Control.Parallel.Strategies
 
 mag2:: Complex Double -> Double
 mag2 (a:+b) = a^(2::Int) + b^(2::Int)
@@ -65,13 +66,14 @@ bmpValues :: Int -> Int -> Double -> Double -> Double -> [Word8]
 bmpValues w h xc yc picScale =
     let wf = fromIntegral w * picScale
         hf = fromIntegral h * picScale
-        floatOrderFromIJ :: Int -> Int -> Double
-        floatOrderFromIJ i j = let x0 = xc - 0.5*wf + (fromIntegral j)*wf/(fromIntegral (w-1))
-                                   y0 = yc - 0.5*hf + (fromIntegral i)*hf/(fromIntegral (h-1))
-                                   z0 = x0 :+ y0
-                                in floatOrder (mandelbrot z0) escapeRadius2 maxIter z0
-        vals = floatOrderFromIJ <$> [0..h-1] <*> [0..w-1]
-        maxVal = maximum vals
+        floatOrderFromIJ :: (Int, Int) -> Double
+        floatOrderFromIJ (i,j) = let x0 = xc - 0.5*wf + (fromIntegral j)*wf/(fromIntegral (w-1))
+                                     y0 = yc - 0.5*hf + (fromIntegral i)*hf/(fromIntegral (h-1))
+                                     z0 = x0 :+ y0
+                                  in floatOrder (mandelbrot z0) escapeRadius2 maxIter z0
+        indices = (,) <$> [0..h-1] <*> [0..w-1]
+        vals = map floatOrderFromIJ indices
+        maxVal = maximum (vals `using` parListChunk w rdeepseq)
      in map (normToWord8 maxVal) vals
 
 toGrayscale :: [Word8] -> [Word8]
