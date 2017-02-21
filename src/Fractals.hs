@@ -18,22 +18,22 @@ mag2:: Complex Double -> Double
 mag2 (a:+b) = a^(2::Int) + b^(2::Int)
 
 -- | compute the order of a given complex function
-order :: (Complex Double -> Complex Double)   -- ^ a function on the complex plane
-      -> Double                          -- ^ the threshold
-      -> Int                        -- ^ the maximum order
-      -> Complex Double                  -- ^ a starting point
-      -> (Int, Complex Double)           -- ^ the order
-order f thresh2 nMax z0 = let f' = \ (i, z) -> (i+1, f z)
-                              fs = dropWhile (\ (i, z) -> i<nMax && mag2 z < thresh2) $ iterate f' (0, z0)
+order :: (Complex Double -> Complex Double) -- ^ a function on the complex plane
+      -> Double                             -- ^ the escape radius squared
+      -> Int                                -- ^ the maximum order
+      -> Complex Double                     -- ^ a starting point
+      -> (Int, Complex Double)              -- ^ the order
+order f radius2 nMax z0 = let f' = \ (i, z) -> (i+1, f z)
+                              fs = dropWhile (\ (i, z) -> i<nMax && mag2 z < radius2) $ iterate f' (0, z0)
                            in head fs
 
 -- | compute the order of a given complex function
-floatOrder :: (Complex Double -> Complex Double)   -- ^ a function on the complex plane
-           -> Double                          -- ^ the threshold
-           -> Int                        -- ^ the maximum order
-           -> Complex Double                  -- ^ a starting point
-           -> Double                          -- ^ the order
-floatOrder f thresh2 nMax z0 = let (nu, z) = order f thresh2 nMax z0
+floatOrder :: (Complex Double -> Complex Double) -- ^ a function on the complex plane
+           -> Double                             -- ^ the escape radius squared
+           -> Int                                -- ^ the maximum order
+           -> Complex Double                     -- ^ a starting point
+           -> Double                             -- ^ the order
+floatOrder f radius2 nMax z0 = let (nu, z) = order f radius2 nMax z0
                                 in fromIntegral nu - 0.5 * (log $ log $ mag2 z) / log 2.0
 
 -- | the Mandelbrot function: z^2 + c
@@ -55,16 +55,22 @@ bitmapFormat = BitmapFormat BottomToTop PxRGBA
 normToWord8 :: Double -> Double -> Word8
 normToWord8 maxX x = round (255 * x / maxX)
 
+escapeRadius2 :: Double
+escapeRadius2 = 9.0
+
+maxIter :: Int
+maxIter = 255
+
 bmpValues :: Int -> Int -> Double -> Double -> Double -> [Word8]
 bmpValues w h xc yc picScale =
     let wf = fromIntegral w * picScale
         hf = fromIntegral h * picScale
-        vals = [ floatOrder (mandelbrot z0) 9.0 255 z0 |
-            j <- [0..h-1], i <- [0..w-1],
-            let x0 = xc - 0.5*wf + (fromIntegral i)*wf/(fromIntegral (w-1)),
-            let y0 = yc - 0.5*hf + (fromIntegral j)*hf/(fromIntegral (h-1)),
-            let z0 = x0 :+ y0
-            ]
+        floatOrderFromIJ :: Int -> Int -> Double
+        floatOrderFromIJ i j = let x0 = xc - 0.5*wf + (fromIntegral j)*wf/(fromIntegral (w-1))
+                                   y0 = yc - 0.5*hf + (fromIntegral i)*hf/(fromIntegral (h-1))
+                                   z0 = x0 :+ y0
+                                in floatOrder (mandelbrot z0) escapeRadius2 maxIter z0
+        vals = floatOrderFromIJ <$> [0..h-1] <*> [0..w-1]
         maxVal = maximum vals
      in map (normToWord8 maxVal) vals
 
