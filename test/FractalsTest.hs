@@ -14,11 +14,11 @@ prop_toGrayscaleLength :: [Word8] -> Bool
 prop_toGrayscaleLength ws = length (toGrayscale ws) == 4 * (length ws)
 
 inMandelbrotSet :: Int -> Complex Double -> Bool
-inMandelbrotSet nMax z0 = order (mandelbrot z0) 2.0 nMax z0 == nMax
+inMandelbrotSet nMax z0 = nMax == (fst $ order (mandelbrot z0) 2.0 nMax z0)
 
 prop_orderMandelbrotOutside :: Positive Int -> Complex Double -> Property
 prop_orderMandelbrotOutside (Positive nMax) z0 =
-    (magnitude z0 > 2.0) ==> not $ inMandelbrotSet nMax z0
+    (mag2 z0 > 4.0) ==> not $ inMandelbrotSet nMax z0
 
 toUnitCircle :: RealFloat a => Complex a -> Complex a -> Complex a
 toUnitCircle w z = if magW>0.0 && magZ>0.0 then mu else (0.0 :+ 0.0)

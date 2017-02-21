@@ -19,4 +19,4 @@ drawing z0 = bmp 1000 600 z0 0.0001
 main :: IO ()
 --main = print $ order (mandelbrot ((-1.6) :+ 0.0)) (2.0::Double) 256 (0.0 :+ 0.0)
 main = print point >> (display window background $ drawing point)
-    where point = (tangentPoint (5 % 11))::Complex Double
+    where point = (tangentPoint (9 % 17))::Complex Double
