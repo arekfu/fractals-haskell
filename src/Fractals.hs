@@ -40,7 +40,7 @@ mandelbrotCardioid mu = 0.5 * mu * (1.0 - 0.5 * mu)
 bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA
 
-bmpValues :: Int -> Int -> Float -> Float -> Float -> [Word8]
+bmpValues :: RealFloat a => Int -> Int -> a -> a -> a -> [Word8]
 bmpValues w h xc yc picScale = [ fromIntegral $ order (mandelbrot z0) 2.0 255 z0 |
     j <- [0..h-1], i <- [0..w-1],
     let x0 = xc - 0.5*wf + (fromIntegral i)*wf/(fromIntegral (w-1)),
@@ -54,9 +54,9 @@ toGrayscale :: [Word8] -> [Word8]
 toGrayscale [] = []
 toGrayscale (x:xs) = x:x:x:255:(toGrayscale xs)
 
-bmpByteString :: Int -> Int -> Float -> Float -> Float -> B.ByteString
+bmpByteString :: RealFloat a => Int -> Int -> a -> a -> a -> B.ByteString
 bmpByteString w h xc yc picScale = B.pack vals
     where vals = toGrayscale $ bmpValues w h xc yc picScale
 
-bmp :: Int -> Int -> Float -> Float -> Float -> Picture
-bmp w h xc yc picScale = bitmapOfByteString w h bitmapFormat (bmpByteString w h xc yc picScale) False
+bmp :: RealFloat a => Int -> Int -> Complex a -> a -> Picture
+bmp w h (xc :+ yc) picScale = bitmapOfByteString w h bitmapFormat (bmpByteString w h xc yc picScale) False
