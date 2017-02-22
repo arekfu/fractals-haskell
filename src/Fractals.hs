@@ -3,7 +3,6 @@ module Fractals
     , floatOrder
     , mandelbrot
     , bmp
-    , toGrayscale
     , tangentPoint
     , mandelbrotCardioid
     , mag2
@@ -56,8 +55,10 @@ mandelbrotCardioid mu = 0.5 * mu * (1.0 - 0.5 * mu)
 bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA
 
-normToWord8 :: Double -> Double -> Word8
-normToWord8 xMax x = round (255 * x / xMax)
+type Palette = Double -> (Word8, Word8, Word8)
+
+grayscale :: Palette
+grayscale x = let g = floor (255 * x) in (g, g, g)
 
 escapeRadius2 :: Double
 escapeRadius2 = 9.0
@@ -65,7 +66,7 @@ escapeRadius2 = 9.0
 maxIter :: Int
 maxIter = 255
 
-bmpValues :: Int -> Int -> Double -> Double -> Double -> [Word8]
+bmpValues :: Int -> Int -> Double -> Double -> Double -> [Double]
 bmpValues w h xc yc picScale =
     let wf = fromIntegral w * picScale
         hf = fromIntegral h * picScale
@@ -76,16 +77,19 @@ bmpValues w h xc yc picScale =
                                   in floatOrder (mandelbrot z0) escapeRadius2 maxIter z0
         indices = (,) <$> [0..h-1] <*> [0..w-1]
         vals = map floatOrderFromIJ indices
-        maxVal = maximum (vals `using` parListChunk w rdeepseq)
-     in map (normToWord8 maxVal) vals
+     in vals `using` parListChunk h rseq
 
-toGrayscale :: [Word8] -> [Word8]
-toGrayscale [] = []
-toGrayscale (x:xs) = x:x:x:255:(toGrayscale xs)
+toBitmap :: Palette -> [Double] -> [Word8]
+toBitmap _ [] = []
+toBitmap palette l = let maxL = maximum l
+                         toBitmap' _ [] = []
+                         toBitmap' maxX (x:xs) = let (r,g,b) = palette (x/maxX)
+                                                     in r:g:b:255:(toBitmap' maxX xs)
+                      in toBitmap' maxL l
 
 bmpByteString :: Int -> Int -> Double -> Double -> Double -> B.ByteString
 bmpByteString w h xc yc picScale = B.pack vals
-    where vals = toGrayscale $ bmpValues w h xc yc picScale
+    where vals = toBitmap grayscale $ bmpValues w h xc yc picScale
 
 bmp :: Int -> Int -> Complex Double -> Double -> Picture
 bmp w h (xc :+ yc) picScale = bitmapOfByteString w h bitmapFormat (bmpByteString w h xc yc picScale) False
