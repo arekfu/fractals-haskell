@@ -57,7 +57,7 @@ bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA
 
 normToWord8 :: Double -> Double -> Word8
-normToWord8 maxX x = round (255 * x / maxX)
+normToWord8 xMax x = round (255 * x / xMax)
 
 escapeRadius2 :: Double
 escapeRadius2 = 9.0
