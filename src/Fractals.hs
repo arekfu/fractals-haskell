@@ -1,18 +1,21 @@
 module Fractals
-    ( order
-    , floatOrder
-    , mandelbrot
-    , bmp
-    , tangentPoint
-    , mandelbrotCardioid
-    , mag2
-    ) where
+( order
+, floatOrder
+, mandelbrot
+, bmp
+, tangentPoint
+, mandelbrotCardioid
+, mag2
+, toBitmap
+) where
 
 import Data.Complex (Complex(..), mkPolar)
 import Graphics.Gloss
 import qualified Data.ByteString as B
 import Data.Word
 import Control.Parallel.Strategies
+
+import Palette
 
 mag2:: Complex Double -> Double
 mag2 (a:+b) = a^(2::Int) + b^(2::Int)
@@ -55,11 +58,6 @@ mandelbrotCardioid mu = 0.5 * mu * (1.0 - 0.5 * mu)
 bitmapFormat :: BitmapFormat
 bitmapFormat = BitmapFormat BottomToTop PxRGBA
 
-type Palette = Double -> (Word8, Word8, Word8)
-
-grayscale :: Palette
-grayscale x = let g = floor (255 * x) in (g, g, g)
-
 escapeRadius2 :: Double
 escapeRadius2 = 100000.0
 
@@ -89,7 +87,7 @@ toBitmap palette l = let maxL = maximum l
 
 bmpByteString :: Int -> Int -> Double -> Double -> Double -> B.ByteString
 bmpByteString w h xc yc picScale = B.pack vals
-    where vals = toBitmap grayscale $ bmpValues w h xc yc picScale
+    where vals = toBitmap hsv $ bmpValues w h xc yc picScale
 
 bmp :: Int -> Int -> Complex Double -> Double -> Picture
 bmp w h (xc :+ yc) picScale = bitmapOfByteString w h bitmapFormat (bmpByteString w h xc yc picScale) False

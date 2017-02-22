@@ -5,13 +5,13 @@ module FractalsTest
 ) where
 
 import Test.QuickCheck
-import Data.Word
 import Data.Complex
 
 import Fractals
+import Palette
 
-prop_toGrayscaleLength :: [Word8] -> Bool
-prop_toGrayscaleLength ws = length (toGrayscale ws) == 4 * (length ws)
+prop_toGrayscaleLength :: [Double] -> Bool
+prop_toGrayscaleLength ws = length (toBitmap grayscale ws) == 4 * (length ws)
 
 inMandelbrotSet :: Int -> Complex Double -> Bool
 inMandelbrotSet nMax z0 = nMax == (fst $ order (mandelbrot z0) 2.0 nMax z0)
