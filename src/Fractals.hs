@@ -18,7 +18,7 @@ import Control.Parallel.Strategies
 mag2:: Complex Double -> Double
 mag2 (a:+b) = a^(2::Int) + b^(2::Int)
 
--- | compute the order of a given complex function
+-- | Compute the order of a given complex function.
 order :: (Complex Double -> Complex Double) -- ^ a function on the complex plane
       -> Double                             -- ^ the escape radius squared
       -> Int                                -- ^ the maximum order
@@ -28,7 +28,7 @@ order f radius2 nMax z0 = let f' = \ (i, z) -> (i+1, f z)
                               fs = dropWhile (\ (i, z) -> i<nMax && mag2 z < radius2) $ iterate f' (0, z0)
                            in head fs
 
--- | compute the order of a given complex function
+-- | Compute the floating order of a given complex function.
 floatOrder :: (Complex Double -> Complex Double) -- ^ a function on the complex plane
            -> Double                             -- ^ the escape radius squared
            -> Int                                -- ^ the maximum order
@@ -37,16 +37,19 @@ floatOrder :: (Complex Double -> Complex Double) -- ^ a function on the complex 
 floatOrder f radius2 nMax z0 = let (nu, z) = order f radius2 nMax z0
                                 in fromIntegral nu - 0.5 * (log $ log $ mag2 z) / log 2.0
 
--- | the Mandelbrot function: z^2 + c
+-- | the Mandelbrot function: z^2 + c.
 mandelbrot :: Complex Double -- ^ the c parameter
            -> Complex Double -- ^ the z variable
            -> Complex Double -- ^ the resulting value
 mandelbrot (cr:+ci) (zr:+zi) = (cr + zr^(2::Int) - zi^(2::Int)) :+ (ci + 2*zr*zi)
 --mandelbrot c z = z**2 + c
 
+-- | Yield the point tangent to the main cardioid and to the bulb with period q
+--   and combinatorial rotation number r=p/q.
 tangentPoint :: Rational -> Complex Double
 tangentPoint r = mandelbrotCardioid $ mkPolar 1.0 (2.0 * pi * fromRational r)
 
+-- | The equation of the main cardioid.
 mandelbrotCardioid :: Complex Double -> Complex Double
 mandelbrotCardioid mu = 0.5 * mu * (1.0 - 0.5 * mu)
 
