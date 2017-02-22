@@ -61,7 +61,7 @@ grayscale :: Palette
 grayscale x = let g = floor (255 * x) in (g, g, g)
 
 escapeRadius2 :: Double
-escapeRadius2 = 9.0
+escapeRadius2 = 100000.0
 
 maxIter :: Int
 maxIter = 255
