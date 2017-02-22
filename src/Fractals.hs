@@ -35,7 +35,7 @@ floatOrder :: (Complex Double -> Complex Double) -- ^ a function on the complex 
            -> Complex Double                     -- ^ a starting point
            -> Double                             -- ^ the order
 floatOrder f radius2 nMax z0 = let (nu, z) = order f radius2 nMax z0
-                                in fromIntegral nu - 0.5 * (log $ log $ mag2 z) / log 2.0
+                                in fromIntegral nu - log (0.5 * (log $ mag2 z)) / log 2.0
 
 -- | the Mandelbrot function: z^2 + c.
 mandelbrot :: Complex Double -- ^ the c parameter
